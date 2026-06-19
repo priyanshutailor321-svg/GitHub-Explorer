@@ -1,32 +1,103 @@
 const profile = document.getElementById("profile");
 
-async function searchUser() {
+const themeBtn = document.getElementById("themeBtn");
+
+if(localStorage.getItem("theme")==="light"){
+    document.body.classList.add("light");
+    themeBtn.textContent="☀️";
+}
+
+themeBtn.addEventListener("click",()=>{
+
+    document.body.classList.toggle("light");
+
+    if(document.body.classList.contains("light")){
+        localStorage.setItem("theme","light");
+        themeBtn.textContent="☀️";
+    }
+    else{
+        localStorage.setItem("theme","dark");
+        themeBtn.textContent="🌙";
+    }
+
+});
+
+document
+.getElementById("username")
+.addEventListener("keypress",(e)=>{
+
+    if(e.key==="Enter"){
+        searchUser();
+    }
+
+});
+
+function clearData(){
+
+    document.getElementById("username").value="";
+    profile.innerHTML="";
+
+}
+
+async function searchUser(){
 
     const username =
-        document.getElementById("username").value.trim();
+    document.getElementById("username")
+    .value
+    .trim();
 
-    if(!username) return;
+    if(!username){
+        alert("Enter Username");
+        return;
+    }
 
-    profile.innerHTML = "<p>Loading...</p>";
+    profile.innerHTML =
+    "<h3>Loading...</h3>";
 
-    try {
+    try{
 
-        const res = await fetch(
-            `https://api.github.com/users/${username}`
+        const userResponse =
+        await fetch(
+        `https://api.github.com/users/${username}`
         );
 
-        if(!res.ok) throw new Error();
+        if(!userResponse.ok){
+            throw new Error();
+        }
 
-        const user = await res.json();
+        const user =
+        await userResponse.json();
 
-        profile.innerHTML = `
+        const repoResponse =
+        await fetch(
+        `https://api.github.com/users/${username}/repos?sort=updated&per_page=5`
+        );
+
+        const repos =
+        await repoResponse.json();
+
+        profile.innerHTML=`
+
         <div class="profile-card">
 
             <img src="${user.avatar_url}">
 
             <h2>${user.name || user.login}</h2>
 
+            <p>@${user.login}</p>
+
             <p>${user.bio || "No Bio Available"}</p>
+
+            <p>📍 ${user.location || "Unknown"}</p>
+
+            <p>🏢 ${user.company || "Not Available"}</p>
+
+            <p>🌐 ${user.blog || "No Website"}</p>
+
+            <p>📅 Joined:
+            ${new Date(user.created_at)
+            .toLocaleDateString()}
+            </p>
 
             <div class="stats">
 
@@ -47,17 +118,48 @@ async function searchUser() {
 
             </div>
 
-            <a href="${user.html_url}" target="_blank">
-                Visit Profile
+            <a
+            class="profile-link"
+            href="${user.html_url}"
+            target="_blank">
+            View Profile
             </a>
 
+            <div class="repo-list">
+
+                <h3>
+                Latest Repositories
+                </h3>
+
+                ${repos.map(repo => `
+                    <div class="repo-item">
+
+                        <a
+                        href="${repo.html_url}"
+                        target="_blank">
+
+                        ${repo.name}
+
+                        </a>
+
+                    </div>
+                `).join("")}
+
+            </div>
+
         </div>
+
         `;
 
     }
-    catch {
+    catch{
 
-        profile.innerHTML =
-        `<p class="error">User Not Found ❌</p>`;
+        profile.innerHTML=
+        `
+        <p class="error">
+        User Not Found ❌
+        </p>
+        `;
     }
+
 }
