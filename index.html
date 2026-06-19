@@ -13,8 +13,25 @@
     <h1>GitHub Explorer 🚀</h1>
 
     <div class="search-box">
-        <input type="text" id="username" placeholder="Enter GitHub Username">
-        <button onclick="searchUser()">Search</button>
+
+        <input
+            type="text"
+            id="username"
+            placeholder="Enter GitHub Username"
+        >
+
+        <button onclick="searchUser()">
+            Search
+        </button>
+
+        <button onclick="clearData()">
+            Clear
+        </button>
+
+        <button id="themeBtn">
+            🌙
+        </button>
+
     </div>
 
     <div id="profile"></div>
